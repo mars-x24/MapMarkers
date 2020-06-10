@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MapMarkers", "MapMarkers.csproj", "{3245D514-978F-4559-A4DE-9F469F4798A9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AtomicTorch.CBND.CoreMod", "..\Core.cpk\AtomicTorch.CBND.CoreMod.csproj", "{086DE0EB-114D-4BDE-B35E-97B94541F0C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3245D514-978F-4559-A4DE-9F469F4798A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3245D514-978F-4559-A4DE-9F469F4798A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3245D514-978F-4559-A4DE-9F469F4798A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3245D514-978F-4559-A4DE-9F469F4798A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {73090B16-E587-4B84-8FDF-0E2212D2F8B3}
+	EndGlobalSection
+EndGlobal

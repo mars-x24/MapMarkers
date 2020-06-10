@@ -1,0 +1,42 @@
+﻿<Project>
+  <PropertyGroup Label="Configuration">    
+    <!-- Please set your mod ID here -->
+    <AssemblyName>MapMarkers</AssemblyName>
+    <!-- Please define the C# root namespace for your mod here -->
+    <RootNamespace>MapMarkers</RootNamespace>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <TargetFramework>net471</TargetFramework>
+    <CryoFallSdk>$(ProjectDir)..\CryoFall.Mod.Sdk\</CryoFallSdk>
+    <CryoFallSdk Condition="!Exists('$(CryoFallSdk)')">$(ProjectDir)..\..\..\Core\CryoFall.Mod.Sdk\</CryoFallSdk>
+    <CryoFallSdk Condition="!Exists('$(CryoFallSdk)')">"CryoFall SDK cannot be located. Please ensure the mod csproj is located at CryoFall/Data/Mods"</CryoFallSdk>
+  </PropertyGroup>    
+  
+  <Import Project="$(CryoFallSdk)Sdk.props" />    
+  
+  <ItemGroup>
+    <Compile Remove="Content\**" />
+    <Compile Remove="Localization\**" />
+    <None Remove="Content\**" />
+    <None Remove="Localization\**" />
+    <Page Remove="Content\**" />
+    <Page Remove="Localization\**" />
+  </ItemGroup>    
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Core.cpk\AtomicTorch.CBND.CoreMod.csproj" />
+  </ItemGroup>    
+  
+  <ItemGroup>
+    <Page Update="UI\Controls\Game\HUD\HUDMiniMap.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UI\Controls\Game\HUD\Notifications\HUDNotificationsPanelControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UI\Controls\Game\Map\WindowWorldMap.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>  
+</Project>
