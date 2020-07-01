@@ -26,9 +26,7 @@ namespace CryoFall.MapMarkers.Scripts
     protected CustomMarkManager()
     {
       markers = new List<CustomMarkData>();
-
-      HUDNotificationsPanelControl.NewNotification += HUDNotificationsPanelControl_NewNotification;
-
+      HudNotificationControl.NewNotification += HUDNotificationsPanelControl_NewNotification;
       ChatSystem.ClientChatRoomMessageReceived += ChatSystem_ClientChatRoomMessageReceived;
     }
 
@@ -42,7 +40,7 @@ namespace CryoFall.MapMarkers.Scripts
     public void Dispose()
     {
       markers.Clear();
-      HUDNotificationsPanelControl.NewNotification -= HUDNotificationsPanelControl_NewNotification;
+      HudNotificationControl.NewNotification -= HUDNotificationsPanelControl_NewNotification;
       ChatSystem.ClientChatRoomMessageReceived -= ChatSystem_ClientChatRoomMessageReceived;
     }
 
@@ -110,9 +108,9 @@ namespace CryoFall.MapMarkers.Scripts
     public void AddMarker(CustomMarkData markData, bool removeMark, bool removeCloseMark, bool save)
     {
       CustomMarkData? markDataEquals = this.GetMarker(markData.Key);
-      if(markDataEquals.HasValue)
+      if (markDataEquals.HasValue)
       {
-        if(removeMark)
+        if (removeMark)
           this.RemoveMarker(markData.Key, false, true);
         return;
       }
@@ -131,7 +129,7 @@ namespace CryoFall.MapMarkers.Scripts
       if (save)
       {
         this.SaveMarkersToStorage(false);
-        
+
       }
     }
 
@@ -189,8 +187,6 @@ namespace CryoFall.MapMarkers.Scripts
 
     public CustomMarkData? GetMarker(string key)
     {
-      List<CustomMarkData> list = new List<CustomMarkData>();
-
       foreach (CustomMarkData markData in this.markers)
       {
         if (markData == key)

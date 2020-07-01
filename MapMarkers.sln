@@ -15,12 +15,12 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3245D514-978F-4559-A4DE-9F469F4798A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3245D514-978F-4559-A4DE-9F469F4798A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3245D514-978F-4559-A4DE-9F469F4798A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3245D514-978F-4559-A4DE-9F469F4798A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3245D514-978F-4559-A4DE-9F469F4798A9}.Release|Any CPU.ActiveCfg = Debug_LibsAsProjects|Any CPU
+		{3245D514-978F-4559-A4DE-9F469F4798A9}.Release|Any CPU.Build.0 = Debug_LibsAsProjects|Any CPU
 		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Release|Any CPU.ActiveCfg = Debug_LibsAsProjects|Any CPU
+		{086DE0EB-114D-4BDE-B35E-97B94541F0C7}.Release|Any CPU.Build.0 = Debug_LibsAsProjects|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
