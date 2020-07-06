@@ -1,4 +1,5 @@
 ﻿using AtomicTorch.CBND.CoreMod.Systems.Chat;
+using AtomicTorch.CBND.CoreMod.Systems.Notifications;
 using AtomicTorch.CBND.CoreMod.UI.Controls.Game.HUD.Notifications;
 using AtomicTorch.CBND.GameApi.Scripting;
 using AtomicTorch.CBND.GameApi.ServicesClient;
@@ -26,7 +27,7 @@ namespace CryoFall.MapMarkers.Scripts
     protected CustomMarkManager()
     {
       markers = new List<CustomMarkData>();
-      HudNotificationControl.NewNotification += HUDNotificationsPanelControl_NewNotification;
+      NotificationSystem.ClientNotificationDisplayed += this.NotificationSystem_ClientNotificationDisplayed;
       ChatSystem.ClientChatRoomMessageReceived += ChatSystem_ClientChatRoomMessageReceived;
     }
 
@@ -40,7 +41,7 @@ namespace CryoFall.MapMarkers.Scripts
     public void Dispose()
     {
       markers.Clear();
-      HudNotificationControl.NewNotification -= HUDNotificationsPanelControl_NewNotification;
+      NotificationSystem.ClientNotificationDisplayed -= this.NotificationSystem_ClientNotificationDisplayed;
       ChatSystem.ClientChatRoomMessageReceived -= ChatSystem_ClientChatRoomMessageReceived;
     }
 
@@ -70,12 +71,12 @@ namespace CryoFall.MapMarkers.Scripts
       return new List<CustomMarkData>(this.markers);
     }
 
-    private void HUDNotificationsPanelControl_NewNotification(NotificationEventArgs e)
+    private void NotificationSystem_ClientNotificationDisplayed(HudNotificationControl obj)
     {
-      if (string.IsNullOrEmpty(e.Message))
+      if (obj == null || string.IsNullOrEmpty(obj.Message))
         return;
 
-      this.AddMarkerFromMessage(e.Message, true);
+      this.AddMarkerFromMessage(obj.Message, true);
     }
 
     private void ChatSystem_ClientChatRoomMessageReceived(BaseChatRoom chatRoom, in ChatEntry chatEntry)
