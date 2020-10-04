@@ -20,8 +20,10 @@
   {
     public const string ContextMenuCopyCoordinates = "Copy coordinates";
 
+    //MapMarker mod
     public const string ContextMenuCopyMark = "Copy mark";
 
+    //MapMarker mod
     public const string ContextMenuRemoveAllMarks = "Remove all marks";
 
     public const string ContextMenuTeleport = "Teleport";
@@ -30,6 +32,7 @@
 
     private IWorldMapVisualizer[] visualisers;
 
+    //MapMarker mod
     private ClientWorldMapCustomMarkVisualizer markVisualizer;
 
     protected override void InitMenu()
@@ -44,6 +47,7 @@
 
       var landClaimGroupVisualizer = new ClientWorldMapLandClaimsGroupVisualizer(controller);
 
+      //MapMarker mod
       this.markVisualizer = new ClientWorldMapCustomMarkVisualizer(controller);
 
       this.visualisers = new IWorldMapVisualizer[]
@@ -57,6 +61,8 @@
                 new ClientWorldMapEventVisualizer(controller, enableNotifications: true),
                 new ClientWorldMapPartyMembersVisualizer(controller),
                 new ClientWorldMapLastVehicleVisualizer(controller),
+
+                //MapMarker mod
                 this.markVisualizer
       };
     }
@@ -130,7 +136,7 @@
 
     private void CloseContextMenu()
     {
-      if (this.ContextMenu != null)
+      if (this.ContextMenu is not null)
       {
         this.ContextMenu.IsOpen = false;
         this.ContextMenu = null;
@@ -150,6 +156,7 @@
               () => Api.Client.Core.CopyToClipboard(mapPositionWithOffset.ToString()))
       });
 
+      //MapMarker mod
       contextMenu.Items.Add(new MenuItem()
       {
         Header = ContextMenuCopyMark,
@@ -157,6 +164,7 @@
         () => Api.Client.Core.CopyToClipboard("Mark(" + mapPositionWithOffset.ToString() + ")"))
       });
 
+      //MapMarker mod
       contextMenu.Items.Add(new MenuItem()
       {
         Header = ContextMenuRemoveAllMarks,
@@ -203,7 +211,7 @@
 
     private void MapClickHandler(Vector2D worldPosition)
     {
-      if (this.ContextMenu != null)
+      if (this.ContextMenu is not null)
       {
         // context menu is still exist, don't process this click
         return;
@@ -216,6 +224,7 @@
         this.CallTeleport(worldPosition);
       }
 
+      //MapMarker mod
       this.markVisualizer.UserAddMarker(worldPosition);
     }
   }

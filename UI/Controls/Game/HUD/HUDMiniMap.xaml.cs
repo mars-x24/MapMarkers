@@ -11,6 +11,7 @@
   using CryoFall.MapMarkers.UI;
   using System;
   using System.Windows;
+  using System.Windows.Controls;
   using System.Windows.Input;
 
   public partial class HUDMiniMap : BaseUserControl
@@ -29,6 +30,7 @@
 
     private WorldMapControllerMiniMap worldMapController;
 
+    //MapMarker mod
     private ClientWorldMapCustomMarkVisualizer markVisualizer;
 
     public ViewModelControlWorldMap ViewModelControlWorldMap
@@ -40,19 +42,20 @@
     protected override void InitControl()
     {
       this.panningPanel = this.GetByName<PanningPanel>("PanningPanel");
+      var controlTemplatePlayerMark = this.GetResource<ControlTemplate>("PlayerMarkControlTemplate");
 
       var viewModelControlWorldMap = new ViewModelControlWorldMap();
       this.worldMapController = new WorldMapControllerMiniMap(
           this.panningPanel,
           viewModelControlWorldMap,
-          isPlayerMarkDisplayed: false,
+          isPlayerMarkDisplayed: true,
+          isCurrentCameraViewDisplayed: true,
           isListeningToInput: false,
           paddingChunks: 1,
           // map area size will be changed later anyway
-          mapAreaSize: (100, 100));
+          mapAreaSize: (100, 100),
+          controlTemplatePlayerMark);
       this.ViewModelControlWorldMap = viewModelControlWorldMap;
-
-
     }
 
     protected override void OnLoaded()
@@ -61,6 +64,7 @@
 
       var landClaimGroupVisualizer = new ClientWorldMapLandClaimsGroupVisualizer(controller);
 
+      //MapMarker mod
       this.markVisualizer = new ClientWorldMapCustomMarkVisualizer(controller);
 
       this.visualisers = new IWorldMapVisualizer[]
@@ -74,6 +78,8 @@
                 new ClientWorldMapEventVisualizer(controller, enableNotifications: false),
                 new ClientWorldMapPartyMembersVisualizer(controller),
                 new ClientWorldMapLastVehicleVisualizer(controller),
+
+                //MapMarker mod
                 this.markVisualizer
       };
 
@@ -91,13 +97,6 @@
       controller.CenterMapOnPlayerCharacter(resetZoomIfBelowThreshold: false);
 
       this.MouseWheel += this.MouseWheelHandler;
-
-      this.MouseLeftButtonUp += this.MouseLeftButtonUpHandler;
-    }
-
-    private void MouseLeftButtonUpHandler(object sender, MouseButtonEventArgs e)
-    {
-      //  this.markVisualizer.AddMarker(worldPosition);
     }
 
     protected override void OnUnloaded()

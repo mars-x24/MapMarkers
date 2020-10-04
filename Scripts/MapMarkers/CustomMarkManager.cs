@@ -86,9 +86,12 @@ namespace CryoFall.MapMarkers.Scripts
 
     private void AddMarkerFromMessage(string message, bool isOwner)
     {
-      (double x, double y) = GetMark(message);
+      (double x, double y, bool markOwner) = GetMark(message);
       if (double.IsNaN(x) || double.IsNaN(y))
         return;
+
+      if (!markOwner)
+        isOwner = false;
 
       var worldBoundsOffset = Api.Client.World.WorldBounds.Offset;
 
@@ -197,10 +200,11 @@ namespace CryoFall.MapMarkers.Scripts
       return null;
     }
 
-    private (double x, double y) GetMark(string message)
+    private (double x, double y, bool isOwnerOverride) GetMark(string message)
     {
       double x = double.NaN;
       double y = double.NaN;
+      bool isOwner = true;
 
       int index = message.ToLower().IndexOf("mark(");
       if (index >= 0)
@@ -211,7 +215,7 @@ namespace CryoFall.MapMarkers.Scripts
         if (index2 >= index)
         {
           string[] mark = message.Substring(index, index2 - index).Split(';');
-          if (mark.Length == 2)
+          if (mark.Length >= 2)
           {
             if (double.TryParse(mark[0], out double xOk))
               if (double.TryParse(mark[1], out double yOk))
@@ -219,11 +223,15 @@ namespace CryoFall.MapMarkers.Scripts
                 x = xOk;
                 y = yOk;
               }
+
+            if (mark.Length == 3)
+              if (mark[2] == "1")
+                isOwner = false;
           }
         }
       }
 
-      return (x, y);
+      return (x, y, isOwner);
     }
 
     private void SaveMarkersToStorage(bool doEvent)
