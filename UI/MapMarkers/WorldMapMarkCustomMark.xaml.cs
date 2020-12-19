@@ -37,7 +37,5 @@
       this.viewModel?.Dispose();
       this.viewModel = null;
     }
-
-    //test
   }
 }
