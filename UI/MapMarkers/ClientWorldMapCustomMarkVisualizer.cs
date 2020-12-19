@@ -125,14 +125,14 @@
       Canvas.SetTop(control, canvasPosition.Y);
     }
 
-    public void UserRemoveAllMarks()
+    public static void UserRemoveAllMarks()
     {
-      this.customMarkManager.Clear();
+      CustomMarkManager.GetInstance().Clear();
     }
 
-    public void UserAddMarker(Vector2D position)
+    public static void UserAddMarker(Vector2D position)
     {
-      this.customMarkManager.AddMarker(position, true, true, true, true);
+      CustomMarkManager.GetInstance().AddMarker(position, true, true, true, true);
     }
 
 

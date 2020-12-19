@@ -7,11 +7,13 @@
   using AtomicTorch.CBND.CoreMod.Systems.Notifications;
   using AtomicTorch.CBND.CoreMod.Systems.ServerOperator;
   using AtomicTorch.CBND.CoreMod.UI.Controls.Core;
+  using AtomicTorch.CBND.CoreMod.UI.Controls.Game.Map.Data;
   using AtomicTorch.CBND.GameApi.Scripting;
   using AtomicTorch.GameEngine.Common.Client.MonoGame.UI;
   using AtomicTorch.GameEngine.Common.Primitives;
   using CryoFall.MapMarkers.UI;
   using System;
+  using System.Collections.Generic;
   using System.Windows;
   using System.Windows.Controls;
   using System.Windows.Input;
@@ -28,47 +30,27 @@
 
     public const string ContextMenuTeleport = "Teleport";
 
+    private readonly List<IWorldMapVisualizer> visualisers = new();
+
     private ControlWorldMap controlWorldMap;
 
-    private IWorldMapVisualizer[] visualisers;
+    public Action<Vector2Ushort> MapClickOverride { get; set; }
 
-    //MapMarker mod
-    private ClientWorldMapCustomMarkVisualizer markVisualizer;
+    public WorldMapController WorldMapController => this.controlWorldMap.WorldMapController;
 
-    protected override void InitMenu()
+    public void AddVisualizer(IWorldMapVisualizer visualizer)
     {
-      base.InitMenu();
-      this.controlWorldMap = this.GetByName<ControlWorldMap>("ControlWorldMap");
+      this.visualisers.Add(visualizer);
+      visualizer.IsEnabled = this.WorldMapController.IsActive;
     }
 
-    protected override void OnLoaded()
+    public void DestroyVisualizers()
     {
-      var controller = this.controlWorldMap.WorldMapController;
-
-      var landClaimGroupVisualizer = new ClientWorldMapLandClaimsGroupVisualizer(controller);
-
-      //MapMarker mod
-      this.markVisualizer = new ClientWorldMapCustomMarkVisualizer(controller);
-
-      this.visualisers = new IWorldMapVisualizer[]
+      if (this.visualisers.Count == 0)
       {
-                landClaimGroupVisualizer,
-                new ClientWorldMapLandClaimVisualizer(controller, landClaimGroupVisualizer),
-                new ClientWorldMapBedVisualizer(controller),
-                new ClientWorldMapDroppedItemsVisualizer(controller),
-                new ClientWorldMapTradingTerminalsVisualizer(controller),
-                new ClientWorldMapResourcesVisualizer(controller, enableNotifications: true),
-                new ClientWorldMapEventVisualizer(controller, enableNotifications: true),
-                new ClientWorldMapPartyMembersVisualizer(controller),
-                new ClientWorldMapLastVehicleVisualizer(controller),
+        return;
+      }
 
-                //MapMarker mod
-                this.markVisualizer
-      };
-    }
-
-    protected override void OnUnloaded()
-    {
       foreach (var visualiser in this.visualisers)
       {
         try
@@ -81,12 +63,67 @@
         }
       }
 
-      this.visualisers = Array.Empty<IWorldMapVisualizer>();
+      this.visualisers.Clear();
+    }
+
+    public void RestoreDefaultVisualizers()
+    {
+      this.DestroyVisualizers();
+
+      var controller = this.controlWorldMap.WorldMapController;
+      if (controller is null)
+      {
+        throw new InvalidOperationException();
+      }
+
+      var landClaimGroupVisualizer = new ClientWorldMapLandClaimsGroupVisualizer(controller);
+      this.AddVisualizer(landClaimGroupVisualizer);
+      this.AddVisualizer(new ClientWorldMapLandClaimVisualizer(controller, landClaimGroupVisualizer));
+      this.AddVisualizer(new ClientWorldMapBedVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapDroppedItemsVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapTradingTerminalsVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapResourcesVisualizer(controller, enableNotifications: true));
+      this.AddVisualizer(new ClientWorldMapEventVisualizer(controller, enableNotifications: true));
+      this.AddVisualizer(new ClientWorldMapPartyMembersVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapLastVehicleVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapTeleportsVisualizer(controller, isActiveMode: false));
+
+      //MapMarker mod
+      this.AddVisualizer(new ClientWorldMapCustomMarkVisualizer(controller));
+    }
+
+    protected override void InitMenu()
+    {
+      base.InitMenu();
+      this.controlWorldMap = this.GetByName<ControlWorldMap>("ControlWorldMap");
+    }
+
+    protected override void OnLoaded()
+    {
+      this.controlWorldMap.Loaded += this.ControlWorldMapLoadedHandler;
+      this.controlWorldMap.MouseRightButtonUp += this.ControlWorldMapMouseRightButtonUpHandler;
+
+      if (this.controlWorldMap.IsLoaded)
+      {
+        this.ControlWorldMapLoadedHandler(null, null);
+      }
+    }
+
+    protected override void OnUnloaded()
+    {
+      this.controlWorldMap.Loaded -= this.ControlWorldMapLoadedHandler;
+      this.controlWorldMap.MouseRightButtonUp -= this.ControlWorldMapMouseRightButtonUpHandler;
+
+      this.DestroyVisualizers();
     }
 
     protected override void WindowClosed()
     {
-      this.controlWorldMap.WorldMapController.IsActive = false;
+      if (this.controlWorldMap.WorldMapController is not null)
+      {
+        this.controlWorldMap.WorldMapController.IsActive = false;
+      }
+
       foreach (var visualiser in this.visualisers)
       {
         visualiser.IsEnabled = false;
@@ -103,19 +140,11 @@
 
     protected override void WindowOpening()
     {
-      this.controlWorldMap.WorldMapController.IsActive = true;
-      this.controlWorldMap.WorldMapController.MapClickCallback = this.MapClickHandler;
-      this.controlWorldMap.MouseRightButtonUp += this.ControlWorldMapMouseRightButtonUpHandler;
-
-      foreach (var visualiser in this.visualisers)
-      {
-        visualiser.IsEnabled = true;
-      }
-
+      this.TryActivateWorldMapController();
       base.WindowOpening();
     }
 
-    private async void CallTeleport(Vector2D worldPosition)
+    private static async void CallCreativeModeTeleport(Vector2D worldPosition)
     {
       var message = await ConsolePlayerTeleport.ClientCallTeleportAsync(worldPosition);
 
@@ -143,17 +172,39 @@
       }
     }
 
+    private void ControlWorldMapLoadedHandler(object sender, RoutedEventArgs e)
+    {
+      var controller = this.controlWorldMap.WorldMapController;
+      if (controller is null)
+      {
+        throw new InvalidOperationException();
+      }
+
+      this.RestoreDefaultVisualizers();
+
+      this.TryActivateWorldMapController();
+      controller.CenterMapOnPlayerCharacter(true);
+    }
+
     private void ControlWorldMapMouseRightButtonUpHandler(object sender, MouseButtonEventArgs e)
     {
-      var mapPositionWithOffset = this.controlWorldMap.WorldMapController.PointedMapPositionWithOffset;
       this.CloseContextMenu();
+
+      var controller = this.controlWorldMap.WorldMapController;
+      var mapPositionRelative = controller.PointedMapWorldPositionRelative;
+      if (this.MapClickOverride is not null)
+      {
+        var mapPositionAbsolute = controller.PointedMapWorldPositionAbsolute;
+        Api.SafeInvoke(() => this.MapClickOverride(mapPositionAbsolute));
+        return;
+      }
 
       var contextMenu = new ContextMenu();
       contextMenu.Items.Add(new MenuItem()
       {
         Header = ContextMenuCopyCoordinates,
         Command = new ActionCommand(
-              () => Api.Client.Core.CopyToClipboard(mapPositionWithOffset.ToString()))
+              () => Api.Client.Core.CopyToClipboard(mapPositionRelative.ToString()))
       });
 
       //MapMarker mod
@@ -161,7 +212,7 @@
       {
         Header = ContextMenuCopyMark,
         Command = new ActionCommand(
-        () => Api.Client.Core.CopyToClipboard("Mark(" + mapPositionWithOffset.ToString() + ")"))
+        () => Api.Client.Core.CopyToClipboard("Mark(" + mapPositionRelative.ToString() + ")"))
       });
 
       //MapMarker mod
@@ -169,7 +220,7 @@
       {
         Header = ContextMenuRemoveAllMarks,
         Command = new ActionCommand(
-        () => this.markVisualizer.UserRemoveAllMarks())
+        () => ClientWorldMapCustomMarkVisualizer.UserRemoveAllMarks())
       });
 
       var character = Api.Client.Characters.CurrentPlayerCharacter;
@@ -177,12 +228,12 @@
           || ServerOperatorSystem.SharedIsOperator(character)
           || CreativeModeSystem.SharedIsInCreativeMode(character))
       {
-        var mapPositionWithoutOffset = this.controlWorldMap.WorldMapController.PointedMapPositionWithoutOffset;
+        var mapPositionWithoutOffset = controller.PointedMapWorldPositionAbsolute;
         contextMenu.Items.Add(new MenuItem()
         {
           Header = ContextMenuTeleport,
           Command = new ActionCommand(
-                () => this.CallTeleport(mapPositionWithoutOffset.ToVector2D()))
+                () => CallCreativeModeTeleport(mapPositionWithoutOffset.ToVector2D()))
         });
       }
 
@@ -217,15 +268,46 @@
         return;
       }
 
+      if (this.MapClickOverride is not null)
+      {
+        var controller = this.controlWorldMap.WorldMapController;
+        var mapPositionAbsolute = controller.PointedMapWorldPositionAbsolute;
+        Api.SafeInvoke(() => this.MapClickOverride(mapPositionAbsolute));
+        return;
+      }
+
       var character = ClientCurrentCharacterHelper.Character;
       if (character.ProtoCharacter is PlayerCharacterSpectator
           || CreativeModeSystem.SharedIsInCreativeMode(character))
       {
-        this.CallTeleport(worldPosition);
+        CallCreativeModeTeleport(worldPosition);
       }
 
       //MapMarker mod
-      this.markVisualizer.UserAddMarker(worldPosition);
+      ClientWorldMapCustomMarkVisualizer.UserAddMarker(worldPosition);
+    }
+
+    private void TryActivateWorldMapController()
+    {
+      if (this.controlWorldMap.WorldMapController is null)
+      {
+        return;
+      }
+
+      switch (this.Window.State)
+      {
+        case GameWindowState.Opening:
+        case GameWindowState.Opened:
+          this.controlWorldMap.WorldMapController.IsActive = true;
+          this.controlWorldMap.WorldMapController.MapClickCallback = this.MapClickHandler;
+
+          foreach (var visualiser in this.visualisers)
+          {
+            visualiser.IsEnabled = true;
+          }
+
+          break;
+      }
     }
   }
 }
