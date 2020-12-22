@@ -6,7 +6,7 @@
   <title>MapMarkers</title>
   <author>Discord:Mars#8365</author>
   <description>Put custom markers on the map</description>
-  <version>0.2.0</version>
+  <version>0.2.1</version>
   <updated>18.12.2020</updated>
   <!-- Mod type: 1=server, 2=client+server, 3=client -->
   <!-- Please note: mods of type 1 are ignored on client (cannot see and activate them)

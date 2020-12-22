@@ -11,12 +11,12 @@
   using AtomicTorch.CBND.GameApi.Scripting;
   using AtomicTorch.GameEngine.Common.Client.MonoGame.UI;
   using AtomicTorch.GameEngine.Common.Primitives;
-  using CryoFall.MapMarkers.UI;
   using System;
   using System.Collections.Generic;
   using System.Windows;
   using System.Windows.Controls;
   using System.Windows.Input;
+  using CryoFall.MapMarkers.UI;
 
   public partial class WindowWorldMap : BaseWindowMenu
   {
@@ -30,66 +30,26 @@
 
     public const string ContextMenuTeleport = "Teleport";
 
-    private readonly List<IWorldMapVisualizer> visualisers = new();
+    private readonly List<BaseWorldMapVisualizer> visualizers = new();
 
     private ControlWorldMap controlWorldMap;
 
     public Action<Vector2Ushort> MapClickOverride { get; set; }
 
+    public IEnumerable<BaseWorldMapVisualizer> Visualizers => this.visualizers;
+
     public WorldMapController WorldMapController => this.controlWorldMap.WorldMapController;
 
-    public void AddVisualizer(IWorldMapVisualizer visualizer)
+    public void AddVisualizer(BaseWorldMapVisualizer visualizer)
     {
-      this.visualisers.Add(visualizer);
+      this.visualizers.Add(visualizer);
       visualizer.IsEnabled = this.WorldMapController.IsActive;
     }
 
-    public void DestroyVisualizers()
+    public void RemoveVisualizer(BaseWorldMapVisualizer visualizer)
     {
-      if (this.visualisers.Count == 0)
-      {
-        return;
-      }
-
-      foreach (var visualiser in this.visualisers)
-      {
-        try
-        {
-          visualiser.Dispose();
-        }
-        catch (Exception ex)
-        {
-          Api.Logger.Exception(ex, "Exception during visualizer disposing");
-        }
-      }
-
-      this.visualisers.Clear();
-    }
-
-    public void RestoreDefaultVisualizers()
-    {
-      this.DestroyVisualizers();
-
-      var controller = this.controlWorldMap.WorldMapController;
-      if (controller is null)
-      {
-        throw new InvalidOperationException();
-      }
-
-      var landClaimGroupVisualizer = new ClientWorldMapLandClaimsGroupVisualizer(controller);
-      this.AddVisualizer(landClaimGroupVisualizer);
-      this.AddVisualizer(new ClientWorldMapLandClaimVisualizer(controller, landClaimGroupVisualizer));
-      this.AddVisualizer(new ClientWorldMapBedVisualizer(controller));
-      this.AddVisualizer(new ClientWorldMapDroppedItemsVisualizer(controller));
-      this.AddVisualizer(new ClientWorldMapTradingTerminalsVisualizer(controller));
-      this.AddVisualizer(new ClientWorldMapResourcesVisualizer(controller, enableNotifications: true));
-      this.AddVisualizer(new ClientWorldMapEventVisualizer(controller, enableNotifications: true));
-      this.AddVisualizer(new ClientWorldMapPartyMembersVisualizer(controller));
-      this.AddVisualizer(new ClientWorldMapLastVehicleVisualizer(controller));
-      this.AddVisualizer(new ClientWorldMapTeleportsVisualizer(controller, isActiveMode: false));
-
-      //MapMarker mod
-      this.AddVisualizer(new ClientWorldMapCustomMarkVisualizer(controller));
+      visualizer.IsEnabled = false;
+      this.visualizers.Remove(visualizer);
     }
 
     protected override void InitMenu()
@@ -124,7 +84,7 @@
         this.controlWorldMap.WorldMapController.IsActive = false;
       }
 
-      foreach (var visualiser in this.visualisers)
+      foreach (var visualiser in this.visualizers)
       {
         visualiser.IsEnabled = false;
       }
@@ -260,6 +220,28 @@
       }
     }
 
+    private void DestroyVisualizers()
+    {
+      if (this.visualizers.Count == 0)
+      {
+        return;
+      }
+
+      foreach (var visualiser in this.visualizers)
+      {
+        try
+        {
+          visualiser.Dispose();
+        }
+        catch (Exception ex)
+        {
+          Api.Logger.Exception(ex, "Exception during visualizer disposing");
+        }
+      }
+
+      this.visualizers.Clear();
+    }
+
     private void MapClickHandler(Vector2D worldPosition)
     {
       if (this.ContextMenu is not null)
@@ -287,6 +269,32 @@
       ClientWorldMapCustomMarkVisualizer.UserAddMarker(worldPosition);
     }
 
+    private void RestoreDefaultVisualizers()
+    {
+      this.DestroyVisualizers();
+
+      var controller = this.controlWorldMap.WorldMapController;
+      if (controller is null)
+      {
+        throw new InvalidOperationException();
+      }
+
+      var landClaimGroupVisualizer = new ClientWorldMapLandClaimsGroupVisualizer(controller);
+      this.AddVisualizer(landClaimGroupVisualizer);
+      this.AddVisualizer(new ClientWorldMapLandClaimVisualizer(controller, landClaimGroupVisualizer));
+      this.AddVisualizer(new ClientWorldMapBedVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapDroppedItemsVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapTradingTerminalsVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapResourcesVisualizer(controller, enableNotifications: true));
+      this.AddVisualizer(new ClientWorldMapEventVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapPartyMembersVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapLastVehicleVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapTeleportsVisualizer(controller, isActiveMode: false));
+
+      //MapMarker mod
+      this.AddVisualizer(new ClientWorldMapCustomMarkVisualizer(controller));
+    }
+
     private void TryActivateWorldMapController()
     {
       if (this.controlWorldMap.WorldMapController is null)
@@ -301,7 +309,7 @@
           this.controlWorldMap.WorldMapController.IsActive = true;
           this.controlWorldMap.WorldMapController.MapClickCallback = this.MapClickHandler;
 
-          foreach (var visualiser in this.visualisers)
+          foreach (var visualiser in this.visualizers)
           {
             visualiser.IsEnabled = true;
           }

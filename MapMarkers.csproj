@@ -26,14 +26,5 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Core.cpk\AtomicTorch.CBND.CoreMod.csproj" />
-  </ItemGroup>    
-  
-  <ItemGroup>
-    <Page Update="UI\Controls\Game\HUD\HUDMiniMap.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="UI\Controls\Game\Map\WindowWorldMap.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>  
 </Project>

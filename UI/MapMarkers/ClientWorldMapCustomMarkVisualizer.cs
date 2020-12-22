@@ -9,18 +9,17 @@
   using System.Windows;
   using System.Windows.Controls;
 
-  public class ClientWorldMapCustomMarkVisualizer : IWorldMapVisualizer
+  public class ClientWorldMapCustomMarkVisualizer : BaseWorldMapVisualizer
   {
     private readonly CustomMarkManager customMarkManager;
 
     private readonly WorldMapController worldMapController;
 
-    private bool isEnabled;
-
     private readonly Dictionary<string, FrameworkElement> markersControl
       = new Dictionary<string, FrameworkElement>();
 
-    public ClientWorldMapCustomMarkVisualizer(WorldMapController worldMapController)
+    public ClientWorldMapCustomMarkVisualizer(WorldMapController worldMapController) 
+      : base(worldMapController)
     {
       this.worldMapController = worldMapController;
 
@@ -28,6 +27,14 @@
       this.customMarkManager.MarkListChanged += CustomMarkManager_MarkListChanged;
       this.customMarkManager.MarkAdded += CustomMarkManager_MarkAdded;
       this.customMarkManager.MarkRemoved += CustomMarkManager_MarkRemoved;
+    }
+
+    protected override void DisposeInternal()
+    {
+      this.RemoveAllMarkers();
+      this.customMarkManager.MarkListChanged -= CustomMarkManager_MarkListChanged;
+      this.customMarkManager.MarkAdded -= CustomMarkManager_MarkAdded;
+      this.customMarkManager.MarkRemoved -= CustomMarkManager_MarkRemoved;
     }
 
     private void CustomMarkManager_MarkRemoved(CustomMarkManager sender, CustomMarkDataEventArgs e)
@@ -45,21 +52,14 @@
       this.Load(e.MarkData);
     }
 
-    public bool IsEnabled
+    protected override void OnDisable()
     {
-      get => this.isEnabled;
-      set
-      {
-        if (this.isEnabled == value)
-        {
-          return;
-        }
+      this.Load();
+    }
 
-        this.isEnabled = value;
-
-        if(this.isEnabled)
-          this.Load();
-      }
+    protected override void OnEnable()
+    {
+      this.Load();
     }
 
     private void Load()
@@ -70,18 +70,14 @@
     private void Load(List<CustomMarkData> listMarkData)
     {
       this.RemoveAllMarkers();
+
+      if (!this.IsEnabled)
+        return;
+
       foreach (CustomMarkData markData in listMarkData)
       {
         this.AddMarker(markData);
       }
-    }
-
-    public void Dispose()
-    {
-      this.RemoveAllMarkers();
-      this.customMarkManager.MarkListChanged -= CustomMarkManager_MarkListChanged;
-      this.customMarkManager.MarkAdded -= CustomMarkManager_MarkAdded;
-      this.customMarkManager.MarkRemoved -= CustomMarkManager_MarkRemoved;
     }
 
     private void RemoveAllMarkers()

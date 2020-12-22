@@ -26,7 +26,7 @@
 
     private ViewModelHUDMiniMap viewModel;
 
-    private IWorldMapVisualizer[] visualisers;
+    private BaseWorldMapVisualizer[] visualisers;
 
     private WorldMapControllerMiniMap worldMapController;
 
@@ -65,7 +65,7 @@
       //MapMarker mod
       this.markVisualizer = new ClientWorldMapCustomMarkVisualizer(controller);
 
-      this.visualisers = new IWorldMapVisualizer[]
+      this.visualisers = new BaseWorldMapVisualizer[]
       {
                 landClaimGroupVisualizer,
                 new ClientWorldMapLandClaimVisualizer(controller, landClaimGroupVisualizer),
@@ -73,12 +73,12 @@
                 new ClientWorldMapDroppedItemsVisualizer(controller),
                 new ClientWorldMapTradingTerminalsVisualizer(controller),
                 new ClientWorldMapResourcesVisualizer(controller, enableNotifications: false),
-                new ClientWorldMapEventVisualizer(controller, enableNotifications: false),
+                new ClientWorldMapEventVisualizer(controller),
                 new ClientWorldMapPartyMembersVisualizer(controller),
                 new ClientWorldMapLastVehicleVisualizer(controller),
                 new ClientWorldMapTeleportsVisualizer(controller, isActiveMode: false),
 
-                //MapMarker mod
+                   //MapMarker mod
                 this.markVisualizer
       };
 
@@ -120,7 +120,7 @@
         }
       }
 
-      this.visualisers = Array.Empty<IWorldMapVisualizer>();
+      this.visualisers = Array.Empty<BaseWorldMapVisualizer>();
 
       this.MouseWheel -= this.MouseWheelHandler;
       ClientUpdateHelper.UpdateCallback -= this.Update;
