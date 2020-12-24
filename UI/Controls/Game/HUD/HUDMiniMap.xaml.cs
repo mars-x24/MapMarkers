@@ -26,7 +26,7 @@
 
     private ViewModelHUDMiniMap viewModel;
 
-    private BaseWorldMapVisualizer[] visualisers;
+    private BaseWorldMapVisualizer[] visualizers;
 
     private WorldMapControllerMiniMap worldMapController;
 
@@ -61,11 +61,10 @@
 
       this.worldMapController = controller;
       var landClaimGroupVisualizer = new ClientWorldMapLandClaimsGroupVisualizer(controller);
-
       //MapMarker mod
       this.markVisualizer = new ClientWorldMapCustomMarkVisualizer(controller);
 
-      this.visualisers = new BaseWorldMapVisualizer[]
+      this.visualizers = new BaseWorldMapVisualizer[]
       {
                 landClaimGroupVisualizer,
                 new ClientWorldMapLandClaimVisualizer(controller, landClaimGroupVisualizer),
@@ -74,17 +73,17 @@
                 new ClientWorldMapTradingTerminalsVisualizer(controller),
                 new ClientWorldMapResourcesVisualizer(controller, enableNotifications: false),
                 new ClientWorldMapEventVisualizer(controller),
-                new ClientWorldMapPartyMembersVisualizer(controller),
+                new ClientWorldMapMembersVisualizer(controller),
                 new ClientWorldMapLastVehicleVisualizer(controller),
                 new ClientWorldMapTeleportsVisualizer(controller, isActiveMode: false),
-
-                   //MapMarker mod
+                                   
+                //MapMarker mod
                 this.markVisualizer
       };
 
-      foreach (var visualiser in this.visualisers)
+      foreach (var visualizer in this.visualizers)
       {
-        visualiser.IsEnabled = true;
+        visualizer.IsEnabled = true;
       }
 
       this.viewModel = new ViewModelHUDMiniMap(this,
@@ -108,11 +107,11 @@
       this.worldMapController.Dispose();
       this.worldMapController = null;
 
-      foreach (var visualiser in this.visualisers)
+      foreach (var visualizer in this.visualizers)
       {
         try
         {
-          visualiser.Dispose();
+          visualizer.Dispose();
         }
         catch (Exception ex)
         {
@@ -120,7 +119,7 @@
         }
       }
 
-      this.visualisers = Array.Empty<BaseWorldMapVisualizer>();
+      this.visualizers = Array.Empty<BaseWorldMapVisualizer>();
 
       this.MouseWheel -= this.MouseWheelHandler;
       ClientUpdateHelper.UpdateCallback -= this.Update;
@@ -157,9 +156,9 @@
       var isActive = this.viewModel.IsMapVisible;
       this.worldMapController.IsActive = isActive;
 
-      foreach (var visualiser in this.visualisers)
+      foreach (var visualizer in this.visualizers)
       {
-        visualiser.IsEnabled = isActive;
+        visualizer.IsEnabled = isActive;
       }
 
       this.worldMapController.CenterMapOnPlayerCharacter(resetZoomIfBelowThreshold: false);

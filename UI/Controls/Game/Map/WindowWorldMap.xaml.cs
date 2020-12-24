@@ -18,6 +18,7 @@
   using System.Windows.Input;
   using CryoFall.MapMarkers.UI;
 
+
   public partial class WindowWorldMap : BaseWindowMenu
   {
     public const string ContextMenuCopyCoordinates = "Copy coordinates";
@@ -84,9 +85,9 @@
         this.controlWorldMap.WorldMapController.IsActive = false;
       }
 
-      foreach (var visualiser in this.visualizers)
+      foreach (var visualizer in this.visualizers)
       {
-        visualiser.IsEnabled = false;
+        visualizer.IsEnabled = false;
       }
 
       base.WindowClosed();
@@ -227,11 +228,11 @@
         return;
       }
 
-      foreach (var visualiser in this.visualizers)
+      foreach (var visualizer in this.visualizers)
       {
         try
         {
-          visualiser.Dispose();
+          visualizer.Dispose();
         }
         catch (Exception ex)
         {
@@ -287,10 +288,10 @@
       this.AddVisualizer(new ClientWorldMapTradingTerminalsVisualizer(controller));
       this.AddVisualizer(new ClientWorldMapResourcesVisualizer(controller, enableNotifications: true));
       this.AddVisualizer(new ClientWorldMapEventVisualizer(controller));
-      this.AddVisualizer(new ClientWorldMapPartyMembersVisualizer(controller));
+      this.AddVisualizer(new ClientWorldMapMembersVisualizer(controller));
       this.AddVisualizer(new ClientWorldMapLastVehicleVisualizer(controller));
       this.AddVisualizer(new ClientWorldMapTeleportsVisualizer(controller, isActiveMode: false));
-
+      
       //MapMarker mod
       this.AddVisualizer(new ClientWorldMapCustomMarkVisualizer(controller));
     }
@@ -309,9 +310,9 @@
           this.controlWorldMap.WorldMapController.IsActive = true;
           this.controlWorldMap.WorldMapController.MapClickCallback = this.MapClickHandler;
 
-          foreach (var visualiser in this.visualizers)
+          foreach (var visualizer in this.visualizers)
           {
-            visualiser.IsEnabled = true;
+            visualizer.IsEnabled = true;
           }
 
           break;
